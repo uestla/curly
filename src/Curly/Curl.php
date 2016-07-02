@@ -14,6 +14,10 @@ class Curl
 	/** @var int */
 	public static $maxRedirects = 6;
 
+	/** @var string */
+	public static $userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36';
+
+
 	/** @var int */
 	private static $depth = 0;
 
@@ -163,9 +167,9 @@ class Curl
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_SSL_VERIFYHOST => FALSE,
 			CURLOPT_SSL_VERIFYPEER => FALSE,
+			CURLOPT_USERAGENT => self::$userAgent,
 			CURLOPT_COOKIEJAR => self::getCurlibCookiesFile(),
 			CURLOPT_COOKIEFILE => self::getCurlibCookiesFile(),
-			CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36',
 		]);
 
 		self::updateCookies();
