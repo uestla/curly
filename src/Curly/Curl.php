@@ -173,7 +173,6 @@ class Curl
 			CURLOPT_COOKIEFILE => self::getCurlibCookiesFile(),
 		]);
 
-		self::updateCookies();
 		$cookies = self::formatCookies($options[CURLOPT_URL]);
 		strlen($cookies) && curl_setopt($ch, CURLOPT_COOKIE, $cookies);
 
@@ -185,6 +184,8 @@ class Curl
 
 		curl_close($ch);
 		unset($ch); // frees memory
+
+		self::updateCookies();
 
 		if (self::$lastErrno !== 0) {
 			return FALSE;
