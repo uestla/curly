@@ -1,0 +1,31 @@
+
+{
+	"name": "uestla/curly",
+	"type": "library",
+	"description": "Simple PHP cURL wrapper class",
+	"keywords": ["php", "curl", "wrapper"],
+	"homepage": "http://github.com/uestla/curly",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Petr Kessler",
+			"homepage": "http://kesspess.1991.cz",
+			"role": "Developer"
+		}
+	],
+	"require" : {
+		"php": ">= 5.6.0",
+		"nette/http": "^2.4",
+		"nette/utils": "^2.4",
+
+		"ext-curl": "*"
+	},
+	"require-dev": {
+		"nette/tester": "*"
+	},
+	"autoload": {
+		"psr-0": {
+			"Curly": "src/"
+		}
+	}
+}
