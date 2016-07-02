@@ -51,8 +51,9 @@ class Curl
 			throw new \Exception('Curl service is already initialized.');
 		}
 
-		self::loadCookies();
 		self::$tempDir = (string) $tempDir;
+		self::loadCookies();
+
 		self::$initialized = TRUE;
 	}
 
