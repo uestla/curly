@@ -25,7 +25,7 @@ class Curl
 	private static $tempDir = NULL;
 
 	/** @var array */
-	private static $cookies = [];
+	private static $cookies = NULL;
 
 	/** @var bool */
 	private static $initialized = FALSE;
@@ -37,8 +37,8 @@ class Curl
 	private static $lastInfo = NULL;
 
 
-	const FILE_CURLIB = 'curlib';
-	const FILE_INTERNAL = 'internal';
+	const FILE_CURLIB = 'curly-curlib';
+	const FILE_INTERNAL = 'curly-internal';
 
 
 	/**
