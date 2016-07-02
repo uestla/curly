@@ -2,11 +2,6 @@
 
 namespace Curly;
 
-use Nette;
-use Nette\Http\Url as NUrl;
-use Nette\Utils\Json as NJson;
-use Nette\Utils\Strings as NStrings;
-
 
 class Curl
 {
@@ -171,10 +166,8 @@ class Curl
 			CURLOPT_USERAGENT => self::$userAgent,
 			CURLOPT_COOKIEJAR => self::getCurlibCookiesFile(),
 			CURLOPT_COOKIEFILE => self::getCurlibCookiesFile(),
+			CURLOPT_COOKIE, self::formatCookies($options[CURLOPT_URL]),
 		]);
-
-		$cookies = self::formatCookies($options[CURLOPT_URL]);
-		strlen($cookies) && curl_setopt($ch, CURLOPT_COOKIE, $cookies);
 
 		curl_setopt_array($ch, $options);
 
@@ -214,7 +207,7 @@ class Curl
 		$content = @file_get_contents(self::getInternalCookiesFile());
 
 		if ($content !== FALSE) {
-			self::$cookies = NJson::decode($content, NJson::FORCE_ARRAY);
+			self::$cookies = json_decode($content, TRUE);
 		}
 	}
 
@@ -232,14 +225,14 @@ class Curl
 
 		if ($lines !== FALSE) {
 			foreach ($lines as $line) {
-				if (NStrings::startsWith($line, '#')) {
-					continue;
+				if (isset($line[0]) && $line[0] === '#') { // # comment
+					continue ;
 				}
 
 				$parts = explode("\t", $line);
 
 				if (count($parts) < 7) {
-					continue;
+					continue ;
 				}
 
 				list ($domain, $flag, $path, $secure, $expiration, $name, $value) = $parts;
@@ -254,43 +247,42 @@ class Curl
 			}
 		}
 
-		file_put_contents(self::getInternalCookiesFile(), NJson::encode(self::$cookies));
+		file_put_contents(self::getInternalCookiesFile(), json_encode(self::$cookies));
 	}
 
 
 	/**
 	 * Formats cookies into the HTTP header string (values separated by "; ")
 	 *
-	 * @param  string|NUrl $url
+	 * @param  string $url
 	 * @return string
 	 */
 	private static function formatCookies($url)
 	{
-		try {
-			$nurl = new NUrl($url);
-			$nhost = $nurl->getHost();
-			$npath = $nurl->getPath();
+		$info = @parse_url($url);
+		if ($info === FALSE) {
+			return '';
+		}
 
-			$s = [];
-			foreach (self::$cookies as $domain => $paths) {
-				if (NStrings::endsWith($nhost, $domain)) { // domain matches
-					foreach ($paths as $npath => $values) {
-						if (NStrings::startsWith($npath, $npath)) { // path matches
-							foreach ($values as $name => $value) {
-								if (time() > $value['expiration']) { // not expired yet
-									$s[] = $name . '=' . $value['value'];
-								}
+		$host = isset($info['host']) ? rawurldecode($info['host']) : '';
+		$path = '/' . (isset($info['path']) ? $info['path'] : '');
+
+		$s = [];
+		foreach (self::$cookies as $domain => $paths) {
+			if (substr($host, -strlen($domain)) === $domain) { // $host ends with $domain
+				foreach ($paths as $p => $values) {
+					if (strncmp($path, $p, strlen($p)) === 0) { // path matches
+						foreach ($values as $name => $value) {
+							if (time() < $value['expiration']) { // not expired yet
+								$s[] = $name . '=' . $value['value'];
 							}
 						}
 					}
 				}
 			}
+		}
 
-			return implode('; ', $s);
-
-		} catch (Nette\InvalidArgumentException $e) {} // invalid URL in $url
-
-		return '';
+		return implode('; ', $s);
 	}
 
 
