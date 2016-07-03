@@ -166,7 +166,7 @@ class Curl
 			CURLOPT_USERAGENT => self::$userAgent,
 			CURLOPT_COOKIEJAR => self::getCurlibCookiesFile(),
 			CURLOPT_COOKIEFILE => self::getCurlibCookiesFile(),
-			CURLOPT_COOKIE, self::formatCookies($options[CURLOPT_URL]),
+			CURLOPT_COOKIE => self::formatCookies($options[CURLOPT_URL]),
 		]);
 
 		curl_setopt_array($ch, $options);
