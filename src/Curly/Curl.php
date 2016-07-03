@@ -273,7 +273,7 @@ class Curl
 				foreach ($paths as $p => $values) {
 					if (strncmp($path, $p, strlen($p)) === 0) { // path matches
 						foreach ($values as $name => $value) {
-							if (time() < $value['expiration']) { // not expired yet
+							if (!$value['expiration'] || time() < $value['expiration']) { // not expired yet
 								$s[] = $name . '=' . $value['value'];
 							}
 						}
