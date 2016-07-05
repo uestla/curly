@@ -53,9 +53,7 @@ $httpCode = Curl::getInfo('http_code');
 
 ### Cookies
 
-In `curlib` (used in PHP cURL extension), cookies are not re-used when the same PHP script runs multiple times. `Curly` simulates browser cookies in the way that when one script runs multiple times it remembers previously saved cookies. Both cookie files (for `curlib` and internally for `Curly`) are saved in `$tempDir` directory that is set in `initialize()` method.
-
-#### Reading cookies
+`Curly` offers basic cookie-reading support:
 
 ```php
 // all cookies across all domains
