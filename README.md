@@ -9,12 +9,12 @@ $ composer require uestla/curly
 ```
 
 
-## Usage
+## Basic usage
 
 ```php
 use Curly\Curl;
 
-// initialize first
+// initialize first - set temp directory for cookie files
 Curl::initialize(__DIR__ . '/temp');
 
 // GET request
@@ -46,7 +46,7 @@ $httpCode = Curl::getInfo('http_code');
 
 ### Settings
 
-- `Curly\Curl::$userAgent` - string with UserAgent setting sent with each request (default: [here](https://github.com/uestla/curly/blob/master/src/Curly/Curl.php#L10))
+- `Curly\Curl::$userAgent` - string with UserAgent header sent with each request (default: [here](https://github.com/uestla/curly/blob/master/src/Curly/Curl.php#L12-L13))
 
 - `Curly\Curl::$maxRedirects` - max. number of redirects when auto-redirect is `TRUE` (default: 6)
 
@@ -54,3 +54,16 @@ $httpCode = Curl::getInfo('http_code');
 ### Cookies
 
 In `curlib` (used in PHP cURL extension), cookies are not re-used when the same PHP script runs multiple times. `Curly` simulates browser cookies in the way that when one script runs multiple times it remembers previously saved cookies. Both cookie files (for `curlib` and internally for `Curly`) are saved in `$tempDir` directory that is set in `initialize()` method.
+
+#### Reading cookies
+
+```php
+// all cookies across all domains
+$cookies = Curl::getCookies();
+
+// cookies for specific domain
+$cookies = Curl::getCookies('http://example.com');
+
+// cookies for specific domain and path
+$cookies = Curl::getCookies('http://example.com/foo/bar');
+```
