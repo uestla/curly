@@ -42,7 +42,7 @@ class CookieMonster
 		}
 
 		$host = isset($info['host']) ? rawurldecode($info['host']) : '';
-		$path = '/' . (isset($info['path']) ? $info['path'] : '');
+		$path = '/' . (isset($info['path']) ? rtrim($info['path'], '/') : '');
 
 		$cookies = [];
 		foreach ($this->cookies as $domain => $paths) {
