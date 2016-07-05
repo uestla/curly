@@ -125,11 +125,24 @@ class Curl
 	 */
 	public static function getInfo($key = NULL)
 	{
+		self::checkInitialization();
+
 		if ($key === NULL) {
 			return self::$lastInfo;
 		}
 
 		return self::$lastInfo[$key];
+	}
+
+
+	/**
+	 * @param  string $url
+	 * @return array
+	 */
+	public static function getCookies($url = NULL)
+	{
+		self::checkInitialization();
+		return self::$cookieMonster->getCookies($url);
 	}
 
 
@@ -140,9 +153,7 @@ class Curl
 	 */
 	private static function request(array $options, $redirect = TRUE)
 	{
-		if (!self::$initialized) {
-			throw new \Exception('Curl service not initialized. Please call the ::initialize() method.');
-		}
+		self::checkInitialization();
 
 		if (self::$depth >= self::$maxRedirects) {
 			self::$depth = 0;
@@ -158,7 +169,7 @@ class Curl
 			CURLOPT_USERAGENT => self::$userAgent,
 			CURLOPT_COOKIEJAR => self::$cookieMonster->getCurlibCookiesFile(),
 			CURLOPT_COOKIEFILE => self::$cookieMonster->getCurlibCookiesFile(),
-			CURLOPT_COOKIE => self::$cookieMonster->prepareCookies($options[CURLOPT_URL]),
+			CURLOPT_COOKIE => self::$cookieMonster->formatCookies($options[CURLOPT_URL]),
 		]);
 
 		curl_setopt_array($ch, $options);
@@ -185,6 +196,15 @@ class Curl
 
 		self::$depth = 0;
 		return $res;
+	}
+
+
+	/** @return void */
+	private static function checkInitialization()
+	{
+		if (!self::$initialized) {
+			throw new \Exception('Curl service not initialized. Please call the ::initialize() method.');
+		}
 	}
 
 }

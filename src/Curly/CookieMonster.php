@@ -25,36 +25,57 @@ class CookieMonster
 
 
 	/**
-	 * Formats cookies into the HTTP header string (values separated by "; ")
-	 *
 	 * @param  string $url
-	 * @return string
+	 * @return array
 	 */
-	public function prepareCookies($url)
+	public function getCookies($url = NULL)
 	{
 		$this->loadCookies();
 
+		if ($url === NULL) {
+			return $this->cookies;
+		}
+
 		$info = @parse_url($url);
 		if ($info === FALSE) {
-			return '';
+			return [];
 		}
 
 		$host = isset($info['host']) ? rawurldecode($info['host']) : '';
 		$path = '/' . (isset($info['path']) ? $info['path'] : '');
 
-		$s = [];
+		$cookies = [];
 		foreach ($this->cookies as $domain => $paths) {
 			if (substr($host, -strlen($domain)) === $domain) { // $host ends with $domain
 				foreach ($paths as $p => $values) {
 					if (strncmp($path, $p, strlen($p)) === 0) { // path matches
 						foreach ($values as $name => $value) {
 							if (!$value['expiration'] || time() < $value['expiration']) { // not expired yet
-								$s[] = $name . '=' . $value['value'];
+								$cookies[$name] = $value['value'];
 							}
 						}
 					}
 				}
 			}
+		}
+
+		return $cookies;
+	}
+
+
+	/**
+	 * Formats cookies for HTTP header (string with values separated by "; ")
+	 *
+	 * @param  string $url
+	 * @return string
+	 */
+	public function formatCookies($url)
+	{
+		$s = [];
+		$cookies = $this->getCookies($url);
+
+		foreach ($this->getCookies($url) as $name => $value) {
+			$s[] = $name . '=' . $value;
 		}
 
 		return implode('; ', $s);
