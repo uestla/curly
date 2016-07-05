@@ -16,12 +16,6 @@ class Curl
 	/** @var int */
 	private static $depth = 0;
 
-	/** @var int */
-	private static $tempDir = NULL;
-
-	/** @var array */
-	private static $cookies = NULL;
-
 	/** @var bool */
 	private static $initialized = FALSE;
 
@@ -32,8 +26,8 @@ class Curl
 	private static $lastInfo = NULL;
 
 
-	const FILE_CURLIB = 'curly-curlib';
-	const FILE_INTERNAL = 'curly-internal';
+	/** @var CookieMonster */
+	private static $cookieMonster = NULL;
 
 
 	/**
@@ -46,9 +40,7 @@ class Curl
 			throw new \Exception('Curl service is already initialized.');
 		}
 
-		self::$tempDir = (string) $tempDir;
-		self::loadCookies();
-
+		self::$cookieMonster = new CookieMonster($tempDir);
 		self::$initialized = TRUE;
 	}
 
@@ -164,9 +156,9 @@ class Curl
 			CURLOPT_SSL_VERIFYHOST => FALSE,
 			CURLOPT_SSL_VERIFYPEER => FALSE,
 			CURLOPT_USERAGENT => self::$userAgent,
-			CURLOPT_COOKIEJAR => self::getCurlibCookiesFile(),
-			CURLOPT_COOKIEFILE => self::getCurlibCookiesFile(),
-			CURLOPT_COOKIE => self::formatCookies($options[CURLOPT_URL]),
+			CURLOPT_COOKIEJAR => self::$cookieMonster->getCurlibCookiesFile(),
+			CURLOPT_COOKIEFILE => self::$cookieMonster->getCurlibCookiesFile(),
+			CURLOPT_COOKIE => self::$cookieMonster->formatCookies($options[CURLOPT_URL]),
 		]);
 
 		curl_setopt_array($ch, $options);
@@ -178,7 +170,7 @@ class Curl
 		curl_close($ch);
 		unset($ch); // frees memory
 
-		self::updateCookies();
+		self::$cookieMonster->updateCookies();
 
 		if (self::$lastErrno !== 0) {
 			return FALSE;
@@ -193,110 +185,6 @@ class Curl
 
 		self::$depth = 0;
 		return $res;
-	}
-
-
-	/**
-	 * Loads JSON-encoded cookies from internal cookies file
-	 *
-	 * @return void
-	 */
-	private static function loadCookies()
-	{
-		self::$cookies = [];
-		$content = @file_get_contents(self::getInternalCookiesFile());
-
-		if ($content !== FALSE) {
-			self::$cookies = json_decode($content, TRUE);
-		}
-	}
-
-
-	/**
-	 * Merges self::$cookies & cookies in curlib file
-	 * and saves them JSON-encoded in internal cookies file
-	 *
-	 * @return void
-	 */
-	private static function updateCookies()
-	{
-		$file = self::getCurlibCookiesFile();
-		$lines = @file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-		if ($lines !== FALSE) {
-			foreach ($lines as $line) {
-				if (isset($line[0]) && $line[0] === '#') { // # comment
-					continue ;
-				}
-
-				$parts = explode("\t", $line);
-
-				if (count($parts) < 7) {
-					continue ;
-				}
-
-				list ($domain, $flag, $path, $secure, $expiration, $name, $value) = $parts;
-
-				!isset(self::$cookies[$domain]) && (self::$cookies[$domain] = []);
-				!isset(self::$cookies[$domain][$path]) && (self::$cookies[$domain][$path] = []);
-
-				self::$cookies[$domain][$path][$name] = [
-					'value' => $value,
-					'expiration' => $expiration,
-				];
-			}
-		}
-
-		file_put_contents(self::getInternalCookiesFile(), json_encode(self::$cookies));
-	}
-
-
-	/**
-	 * Formats cookies into the HTTP header string (values separated by "; ")
-	 *
-	 * @param  string $url
-	 * @return string
-	 */
-	private static function formatCookies($url)
-	{
-		$info = @parse_url($url);
-		if ($info === FALSE) {
-			return '';
-		}
-
-		$host = isset($info['host']) ? rawurldecode($info['host']) : '';
-		$path = '/' . (isset($info['path']) ? $info['path'] : '');
-
-		$s = [];
-		foreach (self::$cookies as $domain => $paths) {
-			if (substr($host, -strlen($domain)) === $domain) { // $host ends with $domain
-				foreach ($paths as $p => $values) {
-					if (strncmp($path, $p, strlen($p)) === 0) { // path matches
-						foreach ($values as $name => $value) {
-							if (!$value['expiration'] || time() < $value['expiration']) { // not expired yet
-								$s[] = $name . '=' . $value['value'];
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return implode('; ', $s);
-	}
-
-
-	/** @return string */
-	private static function getCurlibCookiesFile()
-	{
-		return (self::$tempDir ?: __DIR__) . '/' . self::FILE_CURLIB;
-	}
-
-
-	/** @return string */
-	private static function getInternalCookiesFile()
-	{
-		return (self::$tempDir ?: __DIR__) . '/' . self::FILE_INTERNAL;
 	}
 
 }
