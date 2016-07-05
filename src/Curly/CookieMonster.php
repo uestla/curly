@@ -13,8 +13,7 @@ class CookieMonster
 	private $cookies = NULL;
 
 
-	const FILE_CURLIB = 'curly-curlib';
-	const FILE_INTERNAL = 'curly-internal';
+	const FILE_COOKIES = 'curly-cookies';
 
 
 	/** @param  string $tempDir */
@@ -63,34 +62,20 @@ class CookieMonster
 	}
 
 
-	/**
-	 * Formats cookies for HTTP header (string with values separated by "; ")
-	 *
-	 * @param  string $url
-	 * @return string
-	 */
-	public function formatCookies($url)
+	/** @return void */
+	public function loadCookies()
 	{
-		$s = [];
-		$cookies = $this->getCookies($url);
-
-		foreach ($this->getCookies($url) as $name => $value) {
-			$s[] = $name . '=' . $value;
+		if ($this->cookies === NULL) {
+			$this->reloadCookies();
 		}
-
-		return implode('; ', $s);
 	}
 
 
-	/**
-	 * Merges $this->cookies & cookies from curlib file
-	 * and saves them JSON-encoded in internal cookies file
-	 *
-	 * @return void
-	 */
-	public function updateCookies()
+	/** @return void */
+	public function reloadCookies()
 	{
-		$file = $this->getCurlibCookiesFile();
+		$this->cookies = [];
+		$file = $this->getCookiesFile();
 		$lines = @file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 		if ($lines !== FALSE) {
@@ -116,42 +101,13 @@ class CookieMonster
 				];
 			}
 		}
-
-		file_put_contents($this->getInternalCookiesFile(), json_encode($this->cookies));
 	}
 
 
 	/** @return string */
-	public function getCurlibCookiesFile()
+	public function getCookiesFile()
 	{
-		return $this->tempDir . '/' . self::FILE_CURLIB;
-	}
-
-
-	/**
-	 * Loads JSON-encoded cookies from internal cookies file
-	 *
-	 * @return void
-	 */
-	private function loadCookies()
-	{
-		if ($this->cookies !== NULL) {
-			return ;
-		}
-
-		$this->cookies = [];
-		$content = @file_get_contents($this->getInternalCookiesFile());
-
-		if ($content !== FALSE) {
-			$this->cookies = json_decode($content, TRUE);
-		}
-	}
-
-
-	/** @return string */
-	private function getInternalCookiesFile()
-	{
-		return $this->tempDir . '/' . self::FILE_INTERNAL;
+		return $this->tempDir . '/' . self::FILE_COOKIES;
 	}
 
 }

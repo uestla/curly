@@ -162,14 +162,12 @@ class Curl
 
 		$ch = curl_init();
 		curl_setopt_array($ch, [
-			CURLOPT_COOKIESESSION => TRUE,
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_SSL_VERIFYHOST => FALSE,
 			CURLOPT_SSL_VERIFYPEER => FALSE,
 			CURLOPT_USERAGENT => self::$userAgent,
-			CURLOPT_COOKIEJAR => self::$cookieMonster->getCurlibCookiesFile(),
-			CURLOPT_COOKIEFILE => self::$cookieMonster->getCurlibCookiesFile(),
-			CURLOPT_COOKIE => self::$cookieMonster->formatCookies($options[CURLOPT_URL]),
+			CURLOPT_COOKIEJAR => self::$cookieMonster->getCookiesFile(),
+			CURLOPT_COOKIEFILE => self::$cookieMonster->getCookiesFile(),
 		]);
 
 		curl_setopt_array($ch, $options);
@@ -181,7 +179,7 @@ class Curl
 		curl_close($ch);
 		unset($ch); // frees memory
 
-		self::$cookieMonster->updateCookies();
+		self::$cookieMonster->reloadCookies();
 
 		if (self::$lastErrno !== 0) {
 			return FALSE;
