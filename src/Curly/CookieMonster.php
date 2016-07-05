@@ -21,7 +21,6 @@ class CookieMonster
 	public function __construct($tempDir)
 	{
 		$this->tempDir = (string) $tempDir;
-		$this->loadCookies();
 	}
 
 
@@ -33,6 +32,8 @@ class CookieMonster
 	 */
 	public function prepareCookies($url)
 	{
+		$this->loadCookies();
+
 		$info = @parse_url($url);
 		if ($info === FALSE) {
 			return '';
@@ -113,6 +114,10 @@ class CookieMonster
 	 */
 	private function loadCookies()
 	{
+		if ($this->cookies !== NULL) {
+			return ;
+		}
+
 		$this->cookies = [];
 		$content = @file_get_contents($this->getInternalCookiesFile());
 
