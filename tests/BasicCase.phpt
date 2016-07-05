@@ -6,15 +6,22 @@ use Tester\Assert;
 require_once __DIR__ . '/bootstrap.php';
 
 
-$googleURL = 'http://google.com';
+$bingURL = 'http://bing.com';
 
-$googleHTML = Curl::get($googleURL);
-Assert::type('string', $googleHTML);
-Assert::contains('<title>Google</title>', $googleHTML);
-Assert::same(0, strlen(Curl::getInfo('redirect_url'))); // auto-redirected
+// GET request WITH auto-redirect
+$bingHTML = Curl::get($bingURL);
+Assert::type('string', $bingHTML);
+Assert::contains('<title>Bing</title>', $bingHTML);
+Assert::same(0, strlen(Curl::getInfo('redirect_url')));
 
-Curl::get($googleURL, FALSE); // no auto-redirect
-Assert::same(302, Curl::getInfo('http_code')); // 302 - permanently moved
+// GET request WITHOUT auto-redirect
+Curl::get($bingURL, FALSE);
+Assert::same(301, Curl::getInfo('http_code')); // 301 Moved Permanently (redirect to "www." version)
 
-Assert::true(Curl::ping($googleURL)); // HEAD request
+// HEAD request
+Assert::true(Curl::ping($bingURL));
 Assert::false(Curl::ping('nonexistingURL'));
+
+// cookies
+$cookies = Curl::getCookies('http://www.bing.com');
+Assert::true(isset($cookies['SRCHUID']));
