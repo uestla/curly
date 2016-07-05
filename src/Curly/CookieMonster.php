@@ -31,7 +31,7 @@ class CookieMonster
 	 * @param  string $url
 	 * @return string
 	 */
-	public function formatCookies($url)
+	public function prepareCookies($url)
 	{
 		$info = @parse_url($url);
 		if ($info === FALSE) {
