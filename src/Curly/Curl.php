@@ -57,18 +57,22 @@ class Curl
 	 *
 	 * @param  string $url
 	 * @param  bool $redirect
+	 * @param  array $options
 	 * @param  array $headers
 	 * @return bool
 	 */
-	public static function ping($url, $redirect = TRUE, array $headers = NULL)
+	public static function ping($url, $redirect = TRUE, array $options = [], array $headers = NULL)
 	{
 		$options = [
 			CURLOPT_URL => $url,
 			CURLOPT_POST => FALSE,
 			CURLOPT_NOBODY => TRUE,
-		];
 
-		$headers !== NULL && ($options[CURLOPT_HTTPHEADER] = $headers);
+		] + $options;
+
+		if ($headers !== NULL) {
+			$options[CURLOPT_HTTPHEADER] = $headers;
+		}
 
 		$res = self::request($options, $redirect);
 		return $res === FALSE ? FALSE : TRUE; // ::request() returns "" on success
@@ -80,18 +84,23 @@ class Curl
 	 *
 	 * @param  string $url
 	 * @param  bool $redirect
+	 * @param  array $options
 	 * @param  array $headers
 	 * @return string|FALSE
 	 */
-	public static function get($url, $redirect = TRUE, array $headers = NULL)
+	public static function get($url, $redirect = TRUE, array $options = [], array $headers = NULL)
 	{
 		$options = [
 			CURLOPT_URL => $url,
 			CURLOPT_POST => FALSE,
 			CURLOPT_NOBODY => FALSE,
-		];
 
-		$headers !== NULL && ($options[CURLOPT_HTTPHEADER] = $headers);
+		] + $options;
+
+		if ($headers !== NULL) {
+			$options[CURLOPT_HTTPHEADER] = $headers;
+		}
+
 		return self::request($options, $redirect);
 	}
 
@@ -102,19 +111,24 @@ class Curl
 	 * @param  string $url
 	 * @param  mixed $values
 	 * @param  bool $redirect
+	 * @param  array $options
 	 * @param  array $headers
 	 * @return string|FALSE
 	 */
-	public static function post($url, $values = NULL, $redirect = TRUE, array $headers = NULL)
+	public static function post($url, $values = NULL, $redirect = TRUE, array $options = [], array $headers = NULL)
 	{
 		$options = [
 			CURLOPT_URL => $url,
 			CURLOPT_POST => TRUE,
 			CURLOPT_NOBODY => FALSE,
 			CURLOPT_POSTFIELDS => $values,
-		];
 
-		$headers !== NULL && ($options[CURLOPT_HTTPHEADER] = $headers);
+		] + $options;
+
+		if ($headers !== NULL) {
+			$options[CURLOPT_HTTPHEADER] = $headers;
+		}
+
 		return self::request($options, $redirect);
 	}
 
