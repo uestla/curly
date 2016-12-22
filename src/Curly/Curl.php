@@ -177,8 +177,6 @@ class Curl
 		$ch = curl_init();
 		curl_setopt_array($ch, [
 			CURLOPT_RETURNTRANSFER => TRUE,
-			CURLOPT_SSL_VERIFYHOST => FALSE,
-			CURLOPT_SSL_VERIFYPEER => FALSE,
 			CURLOPT_USERAGENT => self::$userAgent,
 			CURLOPT_COOKIEJAR => self::$cookieMonster->getCookiesFile(),
 			CURLOPT_COOKIEFILE => self::$cookieMonster->getCookiesFile(),
