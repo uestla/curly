@@ -213,7 +213,7 @@ class Curl
 	private static function checkInitialization()
 	{
 		if (!self::$initialized) {
-			throw new \Exception('Curl service not initialized. Please call the ::initialize() method.');
+			throw new \Exception('Curl service not initialized. Please call the ' . __CLASS__ . '::initialize() method.');
 		}
 	}
 
