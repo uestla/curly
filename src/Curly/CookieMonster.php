@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This file is part of the Curly package
+ *
+ * @license  MIT
+ * @author   Petr Kessler (https://kesspess.cz)
+ * @link     https://github.com/uestla/curly
+ */
+
 namespace Curly;
 
 
