@@ -46,7 +46,7 @@ $httpCode = Curl::getInfo('http_code');
 
 ### Settings
 
-- `Curly\Curl::$userAgent` - string with UserAgent header sent with each request (default: [here](https://github.com/uestla/curly/blob/master/src/Curly/Curl.php#L12-L13))
+- `Curly\Curl::$userAgent` - string with UserAgent header sent with each request (default: [here](https://github.com/uestla/curly/blob/master/src/Curly/Curl.php#L20-L21))
 
 - `Curly\Curl::$maxRedirects` - max. number of redirects when auto-redirect is `TRUE` (default: 6)
 
